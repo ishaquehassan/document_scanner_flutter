@@ -1,0 +1,72 @@
+group 'com.document.scanner.flutter.document_scanner_flutter'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.3.50'
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+        maven { url  "https://dl.bintray.com/blazei/maven" }
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        ndkVersion "21.1.6352462"
+        ndk
+                {
+                    moduleName "Scanner"
+                }
+    }
+
+    sourceSets.main{
+        java.srcDirs += 'src/main/kotlin'
+        jni.srcDirs = []
+        jniLibs.srcDir 'src/main/libs'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'androidx.core:core-ktx:1.5.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    /// Scan library
+    implementation 'com.android.support:appcompat-v7:22.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.github.ishaquehassan:AndroidDocumentScanLibrary:1.1.2'
+}
