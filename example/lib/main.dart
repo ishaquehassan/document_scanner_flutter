@@ -27,8 +27,7 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (_scannedDocument != null)
-              ...[
+              if (_scannedDocument != null) ...[
                 Image.file(_scannedDocument!, width: 200),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

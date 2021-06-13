@@ -7,3 +7,9 @@
 * Implemented iOS Document Scanner Libarary
 * Migrated to null-safety
 * Implemented Manual Source Selection
+
+## 0.1.2
+
+* Added doc
+* Improved description
+* Updated README

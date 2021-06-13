@@ -10,6 +10,8 @@ import WeScan
 
 class Utils {
     
+    static final channelName:String = "document_scanner_flutter"
+    
     static func getScannedFile(results: ImageScannerResults) -> String? {
         var path: String?
         if(results.doesUserPreferEnhancedScan && results.enhancedScan != nil){

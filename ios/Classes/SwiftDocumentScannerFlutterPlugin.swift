@@ -1,6 +1,6 @@
+import WeScan
 import Flutter
 import UIKit
-import WeScan
 
 public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
     
@@ -15,26 +15,28 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "document_scanner_flutter", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(name: Utils.channelName, binaryMessenger: registrar.messenger())
         let instance = SwiftDocumentScannerFlutterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         self.result = result
+        typealias channelMethod = () -> ()
+        var channelMethods : Dictionary = [String : channelMethod]()
+        channelMethods["camera"] = camera
+        channelMethods["gallery"] = gallery
         
-        if(call.method == "camera"){
-            camera()
-        }else if(call.method == "gallery"){
-            gallery()
-        }else{
+        if(!channelMethods.keys.contains(call.method)){
             result(FlutterMethodNotImplemented)
         }
         
+        channelMethods[call.method]!();
+        
     }
     
-    private func camera(image: UIImage? = nil){
-        let scannerViewController: ImageScannerController = ImageScannerController(image: image)
+    private func camera(){
+        let scannerViewController: ImageScannerController = ImageScannerController()
         scannerViewController.imageScannerDelegate = self
         rootViewController?.present(scannerViewController, animated:true, completion:nil)
     }
@@ -73,6 +75,12 @@ extension SwiftDocumentScannerFlutterPlugin: UIImagePickerControllerDelegate, UI
         picker.dismiss(animated: true)
         
         guard let image = info[.originalImage] as? UIImage else { return }
-        camera(image: image)
+        pikedCamera(image: image)
+    }
+    
+    private func pikedCamera(image: UIImage? = nil){
+        let scannerViewController: ImageScannerController = ImageScannerController(image: image)
+        scannerViewController.imageScannerDelegate = self
+        rootViewController?.present(scannerViewController, animated:true, completion:nil)
     }
 }
