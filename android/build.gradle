@@ -9,15 +9,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:3.5.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 rootProject.allprojects {
     repositories {
-        maven { url "https://jitpack.io" }
-        maven { url  "https://dl.bintray.com/blazei/maven" }
+        maven { url "https://www.jitpack.io" }
         google()
         jcenter()
     }
@@ -32,7 +31,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -68,5 +67,5 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:22.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.github.ishaquehassan:AndroidDocumentScanLibrary:1.1.2'
+    implementation 'com.github.ishaquehassan:AndroidDocumentScanLibrary:1.4'
 }

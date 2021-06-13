@@ -64,10 +64,16 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         this.result = result
-        if (call.method == "scan") {
-            scan()
-        } else {
-            result.notImplemented()
+        when (call.method) {
+            "camera" -> {
+                camera()
+            }
+            "gallery" -> {
+                gallery()
+            }
+            else -> {
+                result.notImplemented()
+            }
         }
     }
 
@@ -81,10 +87,18 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         activityPluginBinding = null
     }
 
-    private fun scan() {
+    private fun camera() {
         activityPluginBinding?.activity?.apply {
             val intent = Intent(this, ScanActivity::class.java)
-            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_INTENT_PREFERENCE)
+            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE,  ScanConstants.OPEN_CAMERA)
+            startActivityForResult(intent, SCAN_REQUEST_CODE)
+        }
+    }
+
+    private fun gallery() {
+        activityPluginBinding?.activity?.apply {
+            val intent = Intent(this, ScanActivity::class.java)
+            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_MEDIA)
             startActivityForResult(intent, SCAN_REQUEST_CODE)
         }
     }
