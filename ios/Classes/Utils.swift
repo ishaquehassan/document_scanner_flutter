@@ -10,7 +10,7 @@ import WeScan
 
 class Utils {
     
-    static final channelName:String = "document_scanner_flutter"
+    static var channelName:String = "document_scanner_flutter"
     
     static func getScannedFile(results: ImageScannerResults) -> String? {
         var path: String?
