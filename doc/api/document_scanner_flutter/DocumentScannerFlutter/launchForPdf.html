@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the DocumentScannerFlutter constructor from the Class DocumentScannerFlutter class from the document_scanner_flutter library, for the Dart programming language.">
-  <title>DocumentScannerFlutter constructor - DocumentScannerFlutter class - document_scanner_flutter library - Dart API</title>
+  <meta name="description" content="API docs for the launchForPdf method from the DocumentScannerFlutter class, for the Dart programming language.">
+  <title>launchForPdf method - DocumentScannerFlutter class - document_scanner_flutter library - Dart API</title>
 
   
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -28,9 +28,9 @@
     <li><a href="../../index.html">document_scanner_flutter</a></li>
     <li><a href="../../document_scanner_flutter/document_scanner_flutter-library.html">document_scanner_flutter</a></li>
     <li><a href="../../document_scanner_flutter/DocumentScannerFlutter-class.html">DocumentScannerFlutter</a></li>
-    <li class="self-crumb">DocumentScannerFlutter constructor</li>
+    <li class="self-crumb">launchForPdf method</li>
   </ol>
-  <div class="self-name">DocumentScannerFlutter</div>
+  <div class="self-name">launchForPdf</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,7 +49,7 @@
       <li><a href="../../index.html">document_scanner_flutter</a></li>
       <li><a href="../../document_scanner_flutter/document_scanner_flutter-library.html">document_scanner_flutter</a></li>
       <li><a href="../../document_scanner_flutter/DocumentScannerFlutter-class.html">DocumentScannerFlutter</a></li>
-      <li class="self-crumb">DocumentScannerFlutter constructor</li>
+      <li class="self-crumb">launchForPdf method</li>
     </ol>
     
     <h5>DocumentScannerFlutter class</h5>
@@ -80,19 +80,33 @@
 
 </ol>
 
-  </div><!--/.sidebar-offcanvas-left-->
+  </div><!--/.sidebar-offcanvas-->
 
   <div id="dartdoc-main-content" class="main-content">
-      <div><h1><span class="kind-constructor">DocumentScannerFlutter</span> constructor     <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+      <div><h1><span class="kind-method">launchForPdf</span> method     <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
 </h1></div>
 
     <section class="multi-line-signature">
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>?</span>&gt;</span></span>
+            <span class="name ">launchForPdf</span>
+(<wbr><ol class="parameter-list"><li><span class="parameter" id="launchForPdf-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span></li>
+<li><span class="parameter" id="launchForPdf-param-androidConfigs">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter">dynamic</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">androidConfigs</span> = <span class="default-value">const {}</span>}</span></li>
+</ol>)
       
-      <span class="name ">DocumentScannerFlutter</span>(<wbr>)
     </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">static Future&lt;File?&gt; launchForPdf(BuildContext context,
+    {Map&lt;dynamic, String&gt; androidConfigs = const {}}) async {
+  Future&lt;File?&gt;? launchWrapper() {
+    return launch(context, androidConfigs: androidConfigs);
+  }
 
-    
-    
+  return await Navigator.push&lt;File&gt;(context,
+      MaterialPageRoute(builder: (_) =&gt; PdfGeneratotGallery(launchWrapper)));
+}</code></pre>
+    </section>
 
   </div> <!-- /.main-content -->
 

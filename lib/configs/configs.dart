@@ -1,4 +1,4 @@
-enum ScannerFileSource { CAMERA, GALLERY, PDF }
+enum ScannerFileSource { CAMERA, GALLERY }
 enum ScannerConfigsAndroid {
   ANDROID_NEXT_BUTTON_TITLE,
   ANDROID_SAVE_BUTTON_TITLE,

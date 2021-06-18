@@ -31,6 +31,10 @@ class DocumentScannerFlutter {
     }
   }
 
+  /// Scanner to generate PDF file from scanned images
+  ///
+  /// `context` : BuildContext to attach PDF generation widgets
+  /// `androidConfigs` : Android scanner labels configuration
   static Future<File?> launchForPdf(BuildContext context,
       {Map<dynamic, String> androidConfigs = const {}}) async {
     Future<File?>? launchWrapper() {
@@ -41,6 +45,11 @@ class DocumentScannerFlutter {
         MaterialPageRoute(builder: (_) => PdfGeneratotGallery(launchWrapper)));
   }
 
+  /// Scanner to get single scanned image
+  ///
+  /// `context` : BuildContext to attach source selection sheet
+  /// `source` : Either ScannerFileSource.CAMERA or ScannerFileSource.GALLERY
+  /// `androidConfigs` : Android scanner labels configuration
   static Future<File?>? launch(BuildContext context,
       {ScannerFileSource? source,
       Map<dynamic, String> androidConfigs = const {}}) {
