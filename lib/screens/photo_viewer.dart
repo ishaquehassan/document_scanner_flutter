@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
+/// @nodoc
 class PhotoViewer extends StatelessWidget {
   final List<File> galleryItems;
   final int selectedItemIndex;

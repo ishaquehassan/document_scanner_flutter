@@ -7,8 +7,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 
+/// @nodoc
 typedef Future<File?>? FilePicker();
 
+/// @nodoc
 class PdfGeneratotGallery extends StatefulWidget {
   final FilePicker filePicker;
 

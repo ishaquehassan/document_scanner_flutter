@@ -47,7 +47,7 @@ class DocumentScannerFlutter {
 
   /// Scanner to get single scanned image
   ///
-  /// `context` : BuildContext to attach source selection sheet
+  /// `context` : BuildContext to attach source selection
   /// `source` : Either ScannerFileSource.CAMERA or ScannerFileSource.GALLERY
   /// `androidConfigs` : Android scanner labels configuration
   static Future<File?>? launch(BuildContext context,
