@@ -40,6 +40,7 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
+    private lateinit var call: MethodCall
 
     /// For activity binding
     private var activityPluginBinding: ActivityPluginBinding? = null
@@ -63,7 +64,9 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+        this.call = call
         this.result = result
+
         when (call.method) {
             "camera" -> {
                 camera()
@@ -87,10 +90,32 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         activityPluginBinding = null
     }
 
+    private fun composeIntentArguments(intent:Intent){
+        if(call.argument<String>("ANDROID_NEXT_BUTTON_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_NEXT_TEXT,  call.argument<String>("ANDROID_NEXT_BUTTON_TITLE"))
+        }
+        if(call.argument<String>("ANDROID_SAVE_BUTTON_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_SAVE_TEXT,  call.argument<String>("ANDROID_SAVE_BUTTON_TITLE"))
+        }
+        if(call.argument<String>("ANDROID_ROTATE_LEFT_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_ROTATE_LEFT_TEXT,  call.argument<String>("ANDROID_ROTATE_LEFT_TITLE"))
+        }
+        if(call.argument<String>("ANDROID_ROTATE_RIGHT_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_ROTATE_RIGHT_TEXT,  call.argument<String>("ANDROID_ROTATE_RIGHT_TITLE"))
+        }
+        if(call.argument<String>("ANDROID_ORIGINAL_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_ORG_TEXT,  call.argument<String>("ANDROID_ORIGINAL_TITLE"))
+        }
+        if(call.argument<String>("ANDROID_BMW_TITLE") != null){
+            intent.putExtra(ScanConstants.SCAN_BNW_TEXT,  call.argument<String>("ANDROID_BMW_TITLE"))
+        }
+    }
+
     private fun camera() {
         activityPluginBinding?.activity?.apply {
             val intent = Intent(this, ScanActivity::class.java)
             intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE,  ScanConstants.OPEN_CAMERA)
+            composeIntentArguments(intent)
             startActivityForResult(intent, SCAN_REQUEST_CODE)
         }
     }
@@ -99,6 +124,7 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         activityPluginBinding?.activity?.apply {
             val intent = Intent(this, ScanActivity::class.java)
             intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_MEDIA)
+            composeIntentArguments(intent)
             startActivityForResult(intent, SCAN_REQUEST_CODE)
         }
     }

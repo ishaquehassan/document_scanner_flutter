@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  advance_pdf_viewer: ^2.0.0
   document_scanner_flutter:
     # When depending on this package from a real application you should use:
     #   document_scanner_flutter: ^x.y.z

@@ -13,3 +13,8 @@
 * Added doc
 * Improved description
 * Updated README
+## 0.2.0
+
+* Added PDF Generator Feature
+* Fixed Android Scanner bugs
+* Implemented Android scanner labels customization feature
