@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'configs/configs.dart';
 
+/// Dcoument Scanner Class
 class DocumentScannerFlutter {
   static MethodChannel get _channel =>
       const MethodChannel('document_scanner_flutter');

@@ -1,9 +1,6 @@
 import 'dart:io';
 import 'package:document_scanner_flutter/screens/photo_viewer.dart';
-
-import '../configs/configs.dart';
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 
@@ -63,6 +60,14 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                 PhotoViewer(galleryItems: files, selectedItemIndex: index)));
   }
 
+  _removeFile(index) {
+    if (index <= files.length - 1) {
+      setState(() {
+        files.removeAt(index);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,102 +81,116 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
         ),
       ),
       body: Stack(
-        children: [
-          Expanded(
-            child: CustomScrollView(
-              primary: false,
-              slivers: <Widget>[
-                SliverPadding(
-                  padding: const EdgeInsets.all(3.0),
-                  sliver: SliverGrid.count(
-                      childAspectRatio: 10.0 / 9.0,
-                      mainAxisSpacing: 1, //horizontal space
-                      crossAxisSpacing: 1, //vertical space
-                      crossAxisCount: 3, //number of images for a row
-                      children: files
-                          .map((image) => GestureDetector(
-                                onTap: () => openViewer(image),
-                                child: Hero(
-                                  tag: image.path,
-                                  child: Stack(
-                                    children: [
-                                      Image.file(
-                                        image,
-                                        height: 150,
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                3,
-                                        fit: BoxFit.cover,
+              children: [
+                (files.isEmpty) 
+          ? Center(
+              child: Text('No scanned files available yet!'),
+            )
+          : Expanded(
+                  child: CustomScrollView(
+                    primary: false,
+                    slivers: <Widget>[
+                      SliverPadding(
+                        padding: const EdgeInsets.all(3.0),
+                        sliver: SliverGrid.count(
+                            childAspectRatio: 10.0 / 9.0,
+                            mainAxisSpacing: 1, //horizontal space
+                            crossAxisSpacing: 1, //vertical space
+                            crossAxisCount: 3, //number of images for a row
+                            children: files
+                                .map((image) => Hero(
+                                      tag: image.path,
+                                      child: Stack(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () => openViewer(image),
+                                            child: Image.file(
+                                              image,
+                                              height: 150,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  3,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          Positioned(
+                                              right: 5,
+                                              top: 5,
+                                              child: GestureDetector(
+                                                onTap: () => _removeFile(files
+                                                    .map((e) => e.path)
+                                                    .toList()
+                                                    .indexOf(image.path)),
+                                                child: Container(
+                                                  padding: EdgeInsets.all(3),
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                          width: 1,
+                                                          color: Colors.grey),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15)),
+                                                  child: Icon(Icons.delete,
+                                                      size: 20,
+                                                      color: Colors.red),
+                                                ),
+                                              ))
+                                        ],
                                       ),
-                                      Positioned(
-                                          right: 5,
-                                          top: 5,
-                                          child: Container(
-                                            padding: EdgeInsets.all(3),
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                    width: 1,
-                                                    color: Colors.grey),
-                                                borderRadius:
-                                                    BorderRadius.circular(15)),
-                                            child: Icon(Icons.delete,
-                                                size: 20, color: Colors.red),
-                                          ))
-                                    ],
-                                  ),
-                                ),
-                              ))
-                          .toList()),
+                                    ))
+                                .toList()),
+                      ),
+                    ],
+                  ),
                 ),
+                Positioned(
+                  bottom: 10,
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    width: MediaQuery.of(context).size.width - 40,
+                    decoration: BoxDecoration(boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(.2),
+                          spreadRadius: 1,
+                          blurRadius: 10)
+                    ], borderRadius: BorderRadius.circular(25)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (files.isNotEmpty)
+                          Expanded(
+                              child: _mainControl(context,
+                                  color: Colors.blue,
+                                  icon: Icons.check,
+                                  title: "Done",
+                                  textColor: Colors.white,
+                                  onTap: onDone,
+                                  radius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      bottomLeft: Radius.circular(25)))),
+                        Expanded(
+                            child: _mainControl(context,
+                                color: files.isEmpty
+                                    ? Colors.blue
+                                    : Colors.cyanAccent,
+                                icon: Icons.add_a_photo,
+                                textColor:
+                                    files.isEmpty ? Colors.white : Colors.black,
+                                title: "Add Image",
+                                onTap: addImage,
+                                radius: files.isEmpty
+                                    ? BorderRadius.circular(25)
+                                    : BorderRadius.only(
+                                        topRight: Radius.circular(25),
+                                        bottomRight: Radius.circular(25)))),
+                      ],
+                    ),
+                  ),
+                )
               ],
             ),
-          ),
-          Positioned(
-            bottom: 10,
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 20),
-              width: MediaQuery.of(context).size.width - 40,
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(.2),
-                    spreadRadius: 1,
-                    blurRadius: 10)
-              ], borderRadius: BorderRadius.circular(25)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (files.isNotEmpty)
-                    Expanded(
-                        child: _mainControl(context,
-                            color: Colors.blue,
-                            icon: Icons.check,
-                            title: "Done",
-                            textColor: Colors.white,
-                            onTap: onDone,
-                            radius: BorderRadius.only(
-                                topLeft: Radius.circular(25),
-                                bottomLeft: Radius.circular(25)))),
-                  Expanded(
-                      child: _mainControl(context,
-                          color:
-                              files.isEmpty ? Colors.blue : Colors.cyanAccent,
-                          icon: Icons.add_a_photo,
-                          textColor:
-                              files.isEmpty ? Colors.white : Colors.black,
-                          title: "Add Image",
-                          onTap: addImage,
-                          radius: files.isEmpty
-                              ? BorderRadius.circular(25)
-                              : BorderRadius.only(
-                                  topRight: Radius.circular(25),
-                                  bottomRight: Radius.circular(25)))),
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
     );
   }
 

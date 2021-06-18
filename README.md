@@ -6,7 +6,7 @@ A document scanner + PDF generator plugin for flutter
 #### Installing
 
 ```yaml
-document_scanner_flutter: ^0.2.1
+document_scanner_flutter: ^0.2.2
 ```
 
 #### Basic Usage

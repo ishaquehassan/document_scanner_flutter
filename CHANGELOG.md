@@ -21,3 +21,7 @@
 ## 0.2.1
 
 * Fixed iOS compilation issue
+## 0.2.2
+
+* Fixed Android compilation issue for file provider
+* Fixed Delete button on scanned images gird
