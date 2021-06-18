@@ -18,3 +18,6 @@
 * Added PDF Generator Feature
 * Fixed Android Scanner bugs
 * Implemented Android scanner labels customization feature
+## 0.2.1
+
+* Fixed iOS compilation issue
