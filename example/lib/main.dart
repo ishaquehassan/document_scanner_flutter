@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
         ScannerLabelsConfig.ANDROID_NEXT_BUTTON_LABEL: "Next Steps",
         ScannerLabelsConfig.PDF_GALLERY_FILLED_TITLE_SINGLE: "Only 1 Page",
         ScannerLabelsConfig.PDF_GALLERY_FILLED_TITLE_MULTIPLE:
-            "Only {PAGES_COOUNT} Page"
+            "Only {PAGES_COUNT} Page"
       },
       //source: ScannerFileSource.CAMERA
     );

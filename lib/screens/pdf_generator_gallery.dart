@@ -100,19 +100,20 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            if (files.isNotEmpty) Text(itemsTitle),
-            if (files.isEmpty)
-              Text(widget.labelsConfig[
-                      ScannerLabelsConfig.PDF_GALLERY_EMPTY_TITLE] ??
-                  "PDF Pages")
-          ],
-        ),
+    var appBar = AppBar(
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          if (files.isNotEmpty) Text(itemsTitle),
+          if (files.isEmpty)
+            Text(widget.labelsConfig[
+                    ScannerLabelsConfig.PDF_GALLERY_EMPTY_TITLE] ??
+                "PDF Pages")
+        ],
       ),
+    );
+    return Scaffold(
+      appBar: appBar,
       body: Stack(
         children: [
           (files.isEmpty)
@@ -121,7 +122,10 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                           ScannerLabelsConfig.PDF_GALLERY_EMPTY_MESSAGE] ??
                       'No scanned files available yet!'),
                 )
-              : Expanded(
+              : Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height -
+                      appBar.preferredSize.height,
                   child: CustomScrollView(
                     primary: false,
                     slivers: <Widget>[
