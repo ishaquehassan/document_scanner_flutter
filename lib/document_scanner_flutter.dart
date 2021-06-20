@@ -37,13 +37,16 @@ class DocumentScannerFlutter {
   /// `context` : BuildContext to attach PDF generation widgets
   /// `androidConfigs` : Android scanner labels configuration
   static Future<File?> launchForPdf(BuildContext context,
-      {Map<dynamic, String> androidConfigs = const {}}) async {
+      {ScannerFileSource? source,
+      Map<dynamic, String> labelsConfig = const {}}) async {
     Future<File?>? launchWrapper() {
-      return launch(context, androidConfigs: androidConfigs);
+      return launch(context, labelsConfig: labelsConfig, source: source);
     }
 
-    return await Navigator.push<File>(context,
-        MaterialPageRoute(builder: (_) => PdfGeneratotGallery(launchWrapper)));
+    return await Navigator.push<File>(
+        context,
+        MaterialPageRoute(
+            builder: (_) => PdfGeneratotGallery(launchWrapper, labelsConfig)));
   }
 
   /// Scanner to get single scanned image
@@ -53,9 +56,9 @@ class DocumentScannerFlutter {
   /// `androidConfigs` : Android scanner labels configuration
   static Future<File?>? launch(BuildContext context,
       {ScannerFileSource? source,
-      Map<dynamic, String> androidConfigs = const {}}) {
+      Map<dynamic, String> labelsConfig = const {}}) {
     if (source != null) {
-      return _scanDocument(source, androidConfigs);
+      return _scanDocument(source, labelsConfig);
     }
     return showModalBottomSheet<File>(
         context: context,
@@ -65,21 +68,25 @@ class DocumentScannerFlutter {
               children: <Widget>[
                 new ListTile(
                     leading: new Icon(Icons.camera_alt),
-                    title: new Text('Camera'),
+                    title: new Text(
+                        labelsConfig[ScannerLabelsConfig.PICKER_CAMERA_LABEL] ??
+                            'Camera'),
                     onTap: () async {
                       Navigator.pop(
                           context,
                           await _scanDocument(
-                              ScannerFileSource.CAMERA, androidConfigs));
+                              ScannerFileSource.CAMERA, labelsConfig));
                     }),
                 new ListTile(
                   leading: new Icon(Icons.image_search),
-                  title: new Text('Photo Library'),
+                  title: new Text(
+                      labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
+                          'Photo Library'),
                   onTap: () async {
                     Navigator.pop(
                         context,
                         await _scanDocument(
-                            ScannerFileSource.GALLERY, androidConfigs));
+                            ScannerFileSource.GALLERY, labelsConfig));
                   },
                 ),
               ],

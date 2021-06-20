@@ -31,6 +31,7 @@ import android.database.Cursor
 import androidx.core.net.toFile
 import com.scanlibrary.ScanActivity
 import com.scanlibrary.ScanConstants
+import kotlin.collections.HashMap
 
 
 /** DocumentScannerFlutterPlugin */
@@ -90,25 +91,21 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         activityPluginBinding = null
     }
 
-    private fun composeIntentArguments(intent:Intent){
-        if(call.argument<String>("ANDROID_NEXT_BUTTON_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_NEXT_TEXT,  call.argument<String>("ANDROID_NEXT_BUTTON_TITLE"))
-        }
-        if(call.argument<String>("ANDROID_SAVE_BUTTON_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_SAVE_TEXT,  call.argument<String>("ANDROID_SAVE_BUTTON_TITLE"))
-        }
-        if(call.argument<String>("ANDROID_ROTATE_LEFT_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_ROTATE_LEFT_TEXT,  call.argument<String>("ANDROID_ROTATE_LEFT_TITLE"))
-        }
-        if(call.argument<String>("ANDROID_ROTATE_RIGHT_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_ROTATE_RIGHT_TEXT,  call.argument<String>("ANDROID_ROTATE_RIGHT_TITLE"))
-        }
-        if(call.argument<String>("ANDROID_ORIGINAL_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_ORG_TEXT,  call.argument<String>("ANDROID_ORIGINAL_TITLE"))
-        }
-        if(call.argument<String>("ANDROID_BMW_TITLE") != null){
-            intent.putExtra(ScanConstants.SCAN_BNW_TEXT,  call.argument<String>("ANDROID_BMW_TITLE"))
-        }
+    private fun composeIntentArguments(intent:Intent) = mapOf(
+        ScanConstants.SCAN_NEXT_TEXT to "ANDROID_NEXT_BUTTON_LABEL",
+        ScanConstants.SCAN_SAVE_TEXT to "ANDROID_SAVE_BUTTON_LABEL",
+        ScanConstants.SCAN_ROTATE_LEFT_TEXT to "ANDROID_ROTATE_LEFT_LABEL",
+        ScanConstants.SCAN_ROTATE_RIGHT_TEXT to "ANDROID_ROTATE_RIGHT_LABEL",
+        ScanConstants.SCAN_ORG_TEXT to "ANDROID_ORIGINAL_LABEL",
+        ScanConstants.SCAN_BNW_TEXT to "ANDROID_BMW_LABEL",
+        ScanConstants.SCAN_SCANNING_MESSAGE to "ANDROID_SCANNING_MESSAGE",
+        ScanConstants.SCAN_LOADING_MESSAGE to "ANDROID_LOADING_MESSAGE",
+        ScanConstants.SCAN_APPLYING_FILTER_MESSAGE to "ANDROID_APPLYING_FILTER_MESSAGE",
+        ScanConstants.SCAN_CANT_CROP_ERROR_TITLE to "ANDROID_CANT_CROP_ERROR_TITLE",
+        ScanConstants.SCAN_CANT_CROP_ERROR_MESSAGE to "ANDROID_CANT_CROP_ERROR_MESSAGE",
+        ScanConstants.SCAN_OK_LABEL to "ANDROID_OK_LABEL"
+    ).entries.filter { call.hasArgument(it.value) && call.argument<String>(it.value) != null }.forEach {
+        intent.putExtra(it.key,  call.argument<String>(it.value))
     }
 
     private fun camera() {

@@ -91,7 +91,7 @@
             <span class="name ">launch</span>
 (<wbr><ol class="parameter-list"><li><span class="parameter" id="launch-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, </span></li>
 <li><span class="parameter" id="launch-param-source">{<span class="type-annotation"><a href="../../configs_configs/ScannerFileSource-class.html">ScannerFileSource</a>?</span> <span class="parameter-name">source</span>, </span></li>
-<li><span class="parameter" id="launch-param-androidConfigs"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter">dynamic</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">androidConfigs</span> = <span class="default-value">const {}</span>}</span></li>
+<li><span class="parameter" id="launch-param-labelsConfig"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter">dynamic</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">labelsConfig</span> = <span class="default-value">const {}</span>}</span></li>
 </ol>)
       
     </section>
@@ -106,9 +106,9 @@
       <h2><span>Implementation</span></h2>
       <pre class="language-dart"><code class="language-dart">static Future&lt;File?&gt;? launch(BuildContext context,
     {ScannerFileSource? source,
-    Map&lt;dynamic, String&gt; androidConfigs = const {}}) {
+    Map&lt;dynamic, String&gt; labelsConfig = const {}}) {
   if (source != null) {
-    return _scanDocument(source, androidConfigs);
+    return _scanDocument(source, labelsConfig);
   }
   return showModalBottomSheet&lt;File&gt;(
       context: context,
@@ -118,21 +118,25 @@
             children: &lt;Widget&gt;[
               new ListTile(
                   leading: new Icon(Icons.camera_alt),
-                  title: new Text(&#39;Camera&#39;),
+                  title: new Text(
+                      labelsConfig[ScannerLabelsConfig.PICKER_CAMERA_LABEL] ??
+                          &#39;Camera&#39;),
                   onTap: () async {
                     Navigator.pop(
                         context,
                         await _scanDocument(
-                            ScannerFileSource.CAMERA, androidConfigs));
+                            ScannerFileSource.CAMERA, labelsConfig));
                   }),
               new ListTile(
                 leading: new Icon(Icons.image_search),
-                title: new Text(&#39;Photo Library&#39;),
+                title: new Text(
+                    labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
+                        &#39;Photo Library&#39;),
                 onTap: () async {
                   Navigator.pop(
                       context,
                       await _scanDocument(
-                          ScannerFileSource.GALLERY, androidConfigs));
+                          ScannerFileSource.GALLERY, labelsConfig));
                 },
               ),
             ],
@@ -152,7 +156,7 @@
 <footer>
   <span class="no-break">
     document_scanner_flutter
-      0.2.1
+      0.2.3
   </span>
 
 </footer>

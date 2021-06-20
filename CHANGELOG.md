@@ -25,3 +25,9 @@
 
 * Fixed Android compilation issue for file provider
 * Fixed Delete button on scanned images gird
+## 0.2.3
+
+* Added more labels to android scanner
+* Removed unwanted action bar from android scanner
+* Removed unwanted low memory warning from android scanner
+* PDF Mode can now enforce source selection for scanning

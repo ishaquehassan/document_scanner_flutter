@@ -1,17 +1,19 @@
 import 'dart:io';
+import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/screens/photo_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 
 /// @nodoc
-typedef Future<File?>? FilePicker();
+typedef Future<File?>? ScannerFilePicker();
 
 /// @nodoc
 class PdfGeneratotGallery extends StatefulWidget {
-  final FilePicker filePicker;
+  final ScannerFilePicker filePicker;
+  final Map<dynamic, String> labelsConfig;
 
-  const PdfGeneratotGallery(this.filePicker);
+  const PdfGeneratotGallery(this.filePicker, this.labelsConfig);
 
   @override
   _PdfGeneratotGalleryState createState() => _PdfGeneratotGalleryState();
@@ -43,11 +45,20 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
       }));
     }
     Directory tempDir = await getTemporaryDirectory();
-    tempDir.createSync();
-    final file =
-        File("${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
-    await file.writeAsBytes(await pdf.save());
-    Navigator.of(context).pop(file);
+    try {
+      tempDir.createSync();
+      final file =
+          File("${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
+      await file.writeAsBytes(await pdf.save());
+      Navigator.of(context).pop(file);
+    } catch (e) {
+      String message = "Unkown Error";
+      if (e is FileSystemException) {
+        message = e.osError?.message ?? 'File System Error';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.redAccent));
+    }
   }
 
   openViewer(File currentItem) {
@@ -68,6 +79,25 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
     }
   }
 
+  String get itemsTitle {
+    late String finalTitle;
+    final String countHolder = "{PAGES_COUNT}";
+    var singleTitle = widget.labelsConfig[
+            ScannerLabelsConfig.PDF_GALLERY_FILLED_TITLE_SINGLE] ??
+        '$countHolder Page';
+    var multiTitle = widget.labelsConfig[
+            ScannerLabelsConfig.PDF_GALLERY_FILLED_TITLE_MULTIPLE] ??
+        '$countHolder Pages';
+    finalTitle = multiTitle;
+    if (files.length == 1) {
+      finalTitle = singleTitle;
+    }
+    if (!finalTitle.contains(countHolder) && files.length > 1) {
+      finalTitle = "${files.length} $finalTitle";
+    }
+    return finalTitle.replaceAll(countHolder, "${files.length}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,18 +105,23 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            if (files.isNotEmpty) Text('${files.length} Pages'),
-            if (files.isEmpty) Text("PDF Pages")
+            if (files.isNotEmpty) Text(itemsTitle),
+            if (files.isEmpty)
+              Text(widget.labelsConfig[
+                      ScannerLabelsConfig.PDF_GALLERY_EMPTY_TITLE] ??
+                  "PDF Pages")
           ],
         ),
       ),
       body: Stack(
-              children: [
-                (files.isEmpty) 
-          ? Center(
-              child: Text('No scanned files available yet!'),
-            )
-          : Expanded(
+        children: [
+          (files.isEmpty)
+              ? Center(
+                  child: Text(widget.labelsConfig[
+                          ScannerLabelsConfig.PDF_GALLERY_EMPTY_MESSAGE] ??
+                      'No scanned files available yet!'),
+                )
+              : Expanded(
                   child: CustomScrollView(
                     primary: false,
                     slivers: <Widget>[
@@ -145,52 +180,55 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                     ],
                   ),
                 ),
-                Positioned(
-                  bottom: 10,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20),
-                    width: MediaQuery.of(context).size.width - 40,
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(.2),
-                          spreadRadius: 1,
-                          blurRadius: 10)
-                    ], borderRadius: BorderRadius.circular(25)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (files.isNotEmpty)
-                          Expanded(
-                              child: _mainControl(context,
-                                  color: Colors.blue,
-                                  icon: Icons.check,
-                                  title: "Done",
-                                  textColor: Colors.white,
-                                  onTap: onDone,
-                                  radius: BorderRadius.only(
-                                      topLeft: Radius.circular(25),
-                                      bottomLeft: Radius.circular(25)))),
-                        Expanded(
-                            child: _mainControl(context,
-                                color: files.isEmpty
-                                    ? Colors.blue
-                                    : Colors.cyanAccent,
-                                icon: Icons.add_a_photo,
-                                textColor:
-                                    files.isEmpty ? Colors.white : Colors.black,
-                                title: "Add Image",
-                                onTap: addImage,
-                                radius: files.isEmpty
-                                    ? BorderRadius.circular(25)
-                                    : BorderRadius.only(
-                                        topRight: Radius.circular(25),
-                                        bottomRight: Radius.circular(25)))),
-                      ],
-                    ),
-                  ),
-                )
-              ],
+          Positioned(
+            bottom: 10,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              width: MediaQuery.of(context).size.width - 40,
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(.2),
+                    spreadRadius: 1,
+                    blurRadius: 10)
+              ], borderRadius: BorderRadius.circular(25)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (files.isNotEmpty)
+                    Expanded(
+                        child: _mainControl(context,
+                            color: Colors.blue,
+                            icon: Icons.check,
+                            title: widget.labelsConfig[ScannerLabelsConfig
+                                    .PDF_GALLERY_DONE_LABEL] ??
+                                "Done",
+                            textColor: Colors.white,
+                            onTap: onDone,
+                            radius: BorderRadius.only(
+                                topLeft: Radius.circular(25),
+                                bottomLeft: Radius.circular(25)))),
+                  Expanded(
+                      child: _mainControl(context,
+                          color:
+                              files.isEmpty ? Colors.blue : Colors.cyanAccent,
+                          icon: Icons.add_a_photo,
+                          textColor:
+                              files.isEmpty ? Colors.white : Colors.black,
+                          title: widget.labelsConfig[ScannerLabelsConfig
+                                  .PDF_GALLERY_ADD_IMAGE_LABEL] ??
+                              "Add Image",
+                          onTap: addImage,
+                          radius: files.isEmpty
+                              ? BorderRadius.circular(25)
+                              : BorderRadius.only(
+                                  topRight: Radius.circular(25),
+                                  bottomRight: Radius.circular(25)))),
+                ],
+              ),
             ),
+          ),
+        ],
+      ),
     );
   }
 
