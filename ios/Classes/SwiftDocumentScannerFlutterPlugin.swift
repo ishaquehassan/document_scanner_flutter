@@ -26,7 +26,6 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         var channelMethods : Dictionary = [String : channelMethod]()
         channelMethods["camera"] = camera
         channelMethods["gallery"] = gallery
-        
         if(!channelMethods.keys.contains(call.method)){
             result(FlutterMethodNotImplemented)
         }
@@ -38,6 +37,7 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
     private func camera(){
         let scannerViewController: ImageScannerController = ImageScannerController()
         scannerViewController.imageScannerDelegate = self
+        
         rootViewController?.present(scannerViewController, animated:true, completion:nil)
     }
     

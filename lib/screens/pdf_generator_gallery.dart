@@ -185,7 +185,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                   ),
                 ),
           Positioned(
-            bottom: 10,
+            bottom: 10 + MediaQuery.of(context).padding.bottom,
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 20),
               width: MediaQuery.of(context).size.width - 40,
