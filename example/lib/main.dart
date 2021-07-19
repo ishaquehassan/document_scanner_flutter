@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Document Scanner Demo'),
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
