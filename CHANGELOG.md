@@ -35,3 +35,7 @@
 ## 0.2.4
 
 * Fixed PDF gallery rendering issue on release build
+
+## 0.2.5
+
+* Safe area UI fixes
