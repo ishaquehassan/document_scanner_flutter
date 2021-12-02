@@ -81,7 +81,7 @@ class DocumentScannerFlutter {
                   leading: new Icon(Icons.image_search),
                   title: new Text(
                       labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
-                          'Photo Library'),
+                          'Galerie photo'),
                   onTap: () async {
                     Navigator.pop(
                         context,

@@ -98,6 +98,32 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
     return finalTitle.replaceAll(countHolder, "${files.length}");
   }
 
+  Widget _mainControl(BuildContext context,
+          {required String title,
+          required Function onTap,
+          required Color color,
+          IconData? icon,
+          Color textColor = Colors.black,
+          required BorderRadius radius}) =>
+      GestureDetector(
+        onTap: () => onTap(),
+        child: Container(
+            decoration: BoxDecoration(borderRadius: radius, color: color),
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(icon, size: 20, color: textColor),
+                  ),
+                Text(title, style: TextStyle(color: textColor))
+              ],
+            ),
+            alignment: Alignment.center),
+      );
+
   @override
   Widget build(BuildContext context) {
     var appBar = AppBar(
@@ -108,7 +134,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
           if (files.isEmpty)
             Text(widget.labelsConfig[
                     ScannerLabelsConfig.PDF_GALLERY_EMPTY_TITLE] ??
-                "PDF Pages")
+                "Prêt a scanner un document PDF")
         ],
       ),
     );
@@ -120,7 +146,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
               ? Center(
                   child: Text(widget.labelsConfig[
                           ScannerLabelsConfig.PDF_GALLERY_EMPTY_MESSAGE] ??
-                      'No scanned files available yet!'),
+                      "Aucun fichier numérisé n'est encore disponible !"),
                 )
               : Container(
                   width: MediaQuery.of(context).size.width,
@@ -205,7 +231,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                             icon: Icons.check,
                             title: widget.labelsConfig[ScannerLabelsConfig
                                     .PDF_GALLERY_DONE_LABEL] ??
-                                "Done",
+                                "Terminé",
                             textColor: Colors.white,
                             onTap: onDone,
                             radius: BorderRadius.only(
@@ -220,7 +246,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                               files.isEmpty ? Colors.white : Colors.black,
                           title: widget.labelsConfig[ScannerLabelsConfig
                                   .PDF_GALLERY_ADD_IMAGE_LABEL] ??
-                              "Add Image",
+                              "Ajout de l'image",
                           onTap: addImage,
                           radius: files.isEmpty
                               ? BorderRadius.circular(25)
@@ -235,30 +261,4 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
       ),
     );
   }
-
-  Widget _mainControl(BuildContext context,
-          {required String title,
-          required Function onTap,
-          required Color color,
-          IconData? icon,
-          Color textColor = Colors.black,
-          required BorderRadius radius}) =>
-      GestureDetector(
-        onTap: () => onTap(),
-        child: Container(
-            decoration: BoxDecoration(borderRadius: radius, color: color),
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Icon(icon, size: 20, color: textColor),
-                  ),
-                Text(title, style: TextStyle(color: textColor))
-              ],
-            ),
-            alignment: Alignment.center),
-      );
 }
