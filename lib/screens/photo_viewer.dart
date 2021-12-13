@@ -37,6 +37,8 @@ class PhotoViewer extends StatelessWidget {
                               (event.expectedTotalBytes ?? 0),
                     ),
                   ),
-                )));
+            ),
+        ),
+    );
   }
 }

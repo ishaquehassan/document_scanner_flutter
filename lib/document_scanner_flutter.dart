@@ -38,7 +38,7 @@ class DocumentScannerFlutter {
   /// `androidConfigs` : Android scanner labels configuration
   static Future<File?> launchForPdf(BuildContext context,
       {ScannerFileSource? source,
-      Map<dynamic, String> labelsConfig = const {}}) async {
+        Map<dynamic, String> labelsConfig = const {}}) async {
     Future<File?>? launchWrapper() {
       return launch(context, labelsConfig: labelsConfig, source: source);
     }
@@ -56,7 +56,7 @@ class DocumentScannerFlutter {
   /// `androidConfigs` : Android scanner labels configuration
   static Future<File?>? launch(BuildContext context,
       {ScannerFileSource? source,
-      Map<dynamic, String> labelsConfig = const {}}) {
+        Map<dynamic, String> labelsConfig = const {}}) {
     if (source != null) {
       return _scanDocument(source, labelsConfig);
     }
