@@ -12,7 +12,11 @@ dependencies:
     sdk: flutter
   pdf: ^3.4.0
   photo_view: ^0.12.0
-  path_provider: ^2.0.2
+  path_provider: ^2.0.8
+  screenshot: ^1.2.3
+  image_picker: ^0.8.4+4
+  another_flushbar: ^1.10.26
+
 
 dev_dependencies:
   flutter_test:
