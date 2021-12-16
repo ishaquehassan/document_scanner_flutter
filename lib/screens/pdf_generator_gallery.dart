@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/screens/photo_viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as Path;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 
@@ -22,6 +23,7 @@ class PdfGeneratotGallery extends StatefulWidget {
 class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
   List<File> files = [];
 
+  // add images
   addImage() async {
     var file = await widget.filePicker();
     if (file != null) {
@@ -31,6 +33,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
     }
   }
 
+  // send image to a permanent directory
   onDone() async {
     final pdf = pw.Document();
     for (var file in files) {
@@ -44,11 +47,15 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
         ); // Center
       }));
     }
-    Directory tempDir = await getTemporaryDirectory();
+    // basename
+    // permanent directory
+    final outPut = await getExternalStorageDirectory();
+
     try {
-      tempDir.createSync();
-      final file =
-      File("${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
+      // basename
+      String path = outPut!.path;
+      String filename = Path.basename('.pdf');
+      final file = File(path + filename);
       await file.writeAsBytes(await pdf.save());
       Navigator.of(context).pop(file);
     } catch (e) {
@@ -146,10 +153,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                               child: Image.file(
                                 image,
                                 height: 150,
-                                width: MediaQuery.of(context)
-                                    .size
-                                    .width /
-                                    3,
+                                width: MediaQuery.of(context).size.width / 3,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -167,7 +171,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                                         color: Colors.white,
                                         border: Border.all(
                                             width: 1,
-                                            color: Colors.grey),
+                                            color: Colors.cyanAccent),
                                         borderRadius:
                                         BorderRadius.circular(
                                             15)),
