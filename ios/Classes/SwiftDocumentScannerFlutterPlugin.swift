@@ -4,7 +4,7 @@ import UIKit
 
 public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
     
-    var rootViewController: UIViewController?
+    var rootViewController: UIViewController?
     var result: FlutterResult?
     
     
@@ -12,6 +12,8 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         super.init()
         rootViewController =
             (UIApplication.shared.delegate?.window??.rootViewController)!;
+        navigationController = rootViewController.navigationController
+        navigationController?.navigationBar.barTintColor = UIColor.blue
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
