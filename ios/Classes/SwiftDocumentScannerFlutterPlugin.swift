@@ -12,8 +12,6 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         super.init()
         rootViewController =
             (UIApplication.shared.delegate?.window??.rootViewController)!;
-        navigationController = rootViewController.navigationController
-        navigationController?.navigationBar.barTintColor = UIColor.blue
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -36,10 +34,11 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         
     }
     
-    private func camera(){
+    private func camera() {
         let scannerViewController: ImageScannerController = ImageScannerController()
         scannerViewController.imageScannerDelegate = self
-        
+        scannerViewController.modalPresentationStyle = .fullScreen
+
         rootViewController?.present(scannerViewController, animated:true, completion:nil)
     }
     
@@ -47,6 +46,8 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
         imagePicker.sourceType = .photoLibrary
+        imagePicker.modalPresentationStyle = .fullScreen
+
         rootViewController?.present(imagePicker, animated: true)
     }
 }
