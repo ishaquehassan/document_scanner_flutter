@@ -1,6 +1,6 @@
 name: document_scanner_flutter
 description: A android & ios document scanner & auto detector plugin for flutter.
-version: 0.2.5
+version: 0.2.6
 homepage: https://github.com/ishaquehassan/document_scanner_flutter
 
 environment:
