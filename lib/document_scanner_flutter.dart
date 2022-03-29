@@ -62,6 +62,7 @@ class DocumentScannerFlutter {
     }
     return showModalBottomSheet<File>(
         context: context,
+        isDismissible: false,
         builder: (BuildContext bc) {
           return Container(
             child: new Wrap(
