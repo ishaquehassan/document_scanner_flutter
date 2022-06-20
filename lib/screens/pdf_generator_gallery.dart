@@ -102,6 +102,12 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
   Widget build(BuildContext context) {
     var appBar = AppBar(
       automaticallyImplyLeading: false,
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(Icons.arrow_back, size: 24,),
+      ),
       title: Row(
         children: [
           if (files.isNotEmpty) Text(itemsTitle),
