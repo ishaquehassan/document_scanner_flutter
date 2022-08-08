@@ -31,7 +31,7 @@
 * Removed unwanted action bar from android scanner
 * Removed unwanted low memory warning from android scanner
 * PDF Mode can now enforce source selection for scanning
-  
+
 ## 0.2.4
 
 * Fixed PDF gallery rendering issue on release build
