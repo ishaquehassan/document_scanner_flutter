@@ -34,18 +34,12 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         
     }
     
-    private func camera(image: UIImage? = nil) {
-        guard let image = info[.originalImage] as? UIImage else { return }
-        // pikedCamera(image: image)
-        let scannerViewController: ImageScannerController = ImageScannerController(image:image)
-        scannerViewController.imageScannerDelegate = self
-        scannerViewController.modalPresentationStyle = .fullScreen
-        // let imagePicker = UIImagePickerController()
-        // imagePicker.delegate = self
-        // imagePicker.sourceType = .photoLibrary
-        // imagePicker.modalPresentationStyle = .fullScreen
-
-        rootViewController?.present(scannerViewController, animated:true, completion:nil)
+    private func camera() {
+        let scanner  = ImageScannerController()
+        scanner.delegate = self
+        scanner.modalPresentationStyle = .fullScreen
+        pikedCamera();
+        rootViewController?.present(scanner, animated: true)
     }
     
     func gallery() {
