@@ -24,7 +24,7 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         self.result = result
         typealias channelMethod = () -> ()
         var channelMethods : Dictionary = [String : channelMethod]()
-        // channelMethods["camera"] = camera
+        channelMethods["camera"] = camera
         channelMethods["gallery"] = gallery
         if(!channelMethods.keys.contains(call.method)){
             result(FlutterMethodNotImplemented)
@@ -34,17 +34,17 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         
     }
     
-    // private func camera() {
-    //     let scannerViewController: ImageScannerController = ImageScannerController()
-    //     scannerViewController.imageScannerDelegate = self
-    //     scannerViewController.modalPresentationStyle = .fullScreen
+    private func camera() {
+        let scannerViewController: ImageScannerController = ImageScannerController(image:image)
+        scannerViewController.imageScannerDelegate = self
+        scannerViewController.modalPresentationStyle = .fullScreen
+        // let imagePicker = UIImagePickerController()
+        // imagePicker.delegate = self
+        // imagePicker.sourceType = .photoLibrary
+        // imagePicker.modalPresentationStyle = .fullScreen
 
-    //     if #available(iOS 13.0, *) {
-    //         scannerViewController.overrideUserInterfaceStyle = .dark
-    //     }
-
-    //     rootViewController?.present(scannerViewController, animated:true, completion:nil)
-    // }
+        rootViewController?.present(scannerViewController, animated:true, completion:nil)
+    }
     
     func gallery() {
         let imagePicker = UIImagePickerController()
