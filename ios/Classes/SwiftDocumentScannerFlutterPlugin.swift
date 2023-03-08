@@ -26,7 +26,7 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         var channelMethods : Dictionary = [String : channelMethod]()
         channelMethods["camera"] = camera
         channelMethods["gallery"] = gallery
-        if(!channelMethods.keys.contains(call.method)){
+        if(!channelMethods.keys.contains(call.method)) {
             result(FlutterMethodNotImplemented)
         }
         
@@ -46,13 +46,30 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         rootViewController?.present(scannerViewController, animated:true, completion:nil)
     }
     
-    func gallery() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        imagePicker.modalPresentationStyle = .fullScreen
+    private func load(fileName: String) -> UIImage? {
+    let fileURL = documentsUrl.appendingPathComponent(fileName)
+    do {
+        let imageData = try Data(contentsOf: fileURL)
+        return UIImage(data: imageData)
+    } catch {
+        print("Error loading image : \(error)")
+    }
+    return nil  
+    }
 
-        rootViewController?.present(imagePicker, animated: true)
+    func gallery() {
+        // let imagePicker = UIImagePickerController()
+        // imagePicker.delegate = self
+        // imagePicker.sourceType = .photoLibrary
+        // imagePicker.modalPresentationStyle = .fullScreen
+
+        // rootViewController?.present(imagePicker, animated: true)
+
+        //path -> UIImage
+
+        let image = load(path)
+
+        // pikedCamera(image);
     }
 }
 
@@ -85,7 +102,7 @@ extension SwiftDocumentScannerFlutterPlugin: UIImagePickerControllerDelegate, UI
         pikedCamera(image: image)
     }
     
-    private func pikedCamera(image: UIImage? = nil){
+    private func pikedCamera(image: UIImage? = nil) {
         let scannerViewController: ImageScannerController = ImageScannerController(image:image)
         scannerViewController.imageScannerDelegate = self
         scannerViewController.modalPresentationStyle = .fullScreen
