@@ -24,9 +24,9 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         self.result = result
         typealias channelMethod = () -> ()
         var channelMethods : Dictionary = [String : channelMethod]()
-        channelMethods["camera"] = camera
+        // channelMethods["camera"] = camera
         channelMethods["gallery"] = gallery
-        if(!channelMethods.keys.contains(call.method)) {
+        if(!channelMethods.keys.contains(call.method)){
             result(FlutterMethodNotImplemented)
         }
         
@@ -34,42 +34,25 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
         
     }
     
-    private func camera() {
-        let scannerViewController: ImageScannerController = ImageScannerController()
-        scannerViewController.imageScannerDelegate = self
-        scannerViewController.modalPresentationStyle = .fullScreen
+    // private func camera() {
+    //     let scannerViewController: ImageScannerController = ImageScannerController()
+    //     scannerViewController.imageScannerDelegate = self
+    //     scannerViewController.modalPresentationStyle = .fullScreen
 
-        if #available(iOS 13.0, *) {
-            scannerViewController.overrideUserInterfaceStyle = .dark
-        }
+    //     if #available(iOS 13.0, *) {
+    //         scannerViewController.overrideUserInterfaceStyle = .dark
+    //     }
 
-        rootViewController?.present(scannerViewController, animated:true, completion:nil)
-    }
+    //     rootViewController?.present(scannerViewController, animated:true, completion:nil)
+    // }
     
-    private func load(fileName: String) -> UIImage? {
-    let fileURL = documentsUrl.appendingPathComponent(fileName)
-    do {
-        let imageData = try Data(contentsOf: fileURL)
-        return UIImage(data: imageData)
-    } catch {
-        print("Error loading image : \(error)")
-    }
-    return nil  
-    }
-
     func gallery() {
-        // let imagePicker = UIImagePickerController()
-        // imagePicker.delegate = self
-        // imagePicker.sourceType = .photoLibrary
-        // imagePicker.modalPresentationStyle = .fullScreen
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.modalPresentationStyle = .fullScreen
 
-        // rootViewController?.present(imagePicker, animated: true)
-
-        //path -> UIImage
-
-        let image = load(path)
-
-        // pikedCamera(image);
+        rootViewController?.present(imagePicker, animated: true)
     }
 }
 
@@ -102,7 +85,7 @@ extension SwiftDocumentScannerFlutterPlugin: UIImagePickerControllerDelegate, UI
         pikedCamera(image: image)
     }
     
-    private func pikedCamera(image: UIImage? = nil) {
+    private func pikedCamera(image: UIImage? = nil){
         let scannerViewController: ImageScannerController = ImageScannerController(image:image)
         scannerViewController.imageScannerDelegate = self
         scannerViewController.modalPresentationStyle = .fullScreen
