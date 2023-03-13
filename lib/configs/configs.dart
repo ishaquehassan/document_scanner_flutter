@@ -1,5 +1,5 @@
 /// To Configure File source to get Image from
-enum ScannerFileSource { CAMERA, GALLERY }
+enum ScannerFileSource { CAMERA, GALLERY, CROPPER }
 
 /// To configure Android Scanner Labels
 enum ScannerLabelsConfig {
@@ -16,6 +16,7 @@ enum ScannerLabelsConfig {
   ANDROID_CANT_CROP_ERROR_TITLE,
   ANDROID_CANT_CROP_ERROR_MESSAGE,
   ANDROID_OK_LABEL,
+  PATH,
 
   /// Unviersal Labels config
   PDF_GALLERY_EMPTY_TITLE,
