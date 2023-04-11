@@ -63,6 +63,10 @@ class DocumentScannerFlutter {
     return showModalBottomSheet<File>(
         context: context,
         isDismissible: false,
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: MediaQuery.of(context).size.height),
+        isScrollControlled: true,
         builder: (BuildContext bc) {
           return Container(
             child: new Wrap(
