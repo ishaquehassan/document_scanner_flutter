@@ -44,12 +44,26 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
         ); // Center
       }));
     }
-    Directory tempDir = await getTemporaryDirectory();
+    // Directory tempDir = await getTemporaryDirectory();
     try {
-      tempDir.createSync();
+      final path = Directory('/storage/emulated/0/scanify/');
       final file =
-          File("${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
-      await file.writeAsBytes(await pdf.save());
+          File("${path.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
+      String res = "";
+      if (await path.exists()) {
+        res = path.path;
+      } else {
+        final Directory appDirectory = await path.create(recursive: true);
+        res = appDirectory.path;
+      }
+      await file.writeAsBytes(await pdf.save()).then((value) => {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("File Saved in External storage"),
+            )),
+          });
+      for (var file in files) {
+        await file.delete();
+      }
       Navigator.of(context).pop(file);
     } catch (e) {
       String message = "Unkown Error";
