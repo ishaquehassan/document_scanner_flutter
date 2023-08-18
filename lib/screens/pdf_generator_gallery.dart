@@ -3,7 +3,7 @@ import 'package:document_scanner_flutter/configs/configs.dart';
 import 'package:document_scanner_flutter/screens/photo_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// @nodoc
 typedef Future<File?>? ScannerFilePicker();
@@ -46,6 +46,10 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
     }
     // Directory tempDir = await getTemporaryDirectory();
     try {
+      final status = await Permission.manageExternalStorage.isGranted;
+      if (!status) {
+        await Permission.manageExternalStorage.request();
+      }
       final path = Directory('/storage/emulated/0/scanify/');
       final file =
           File("${path.path}/${DateTime.now().millisecondsSinceEpoch}.pdf");
