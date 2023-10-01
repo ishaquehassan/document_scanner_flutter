@@ -36,17 +36,45 @@ class DocumentScannerFlutter {
   ///
   /// `context` : BuildContext to attach PDF generation widgets
   /// `androidConfigs` : Android scanner labels configuration
-  static Future<File?> launchForPdf(BuildContext context,
+  static Future<File?>? launchForPdf(BuildContext context,
       {ScannerFileSource? source,
-      Map<dynamic, String> labelsConfig = const {}}) async {
-    Future<File?>? launchWrapper() {
-      return launch(context, labelsConfig: labelsConfig, source: source);
+      Map<dynamic, String> labelsConfig = const {}}) {
+    if (source != null){
+      return _scanDocument(source, labelsConfig);
     }
-
-    return await Navigator.push<File>(
-        context,
-        MaterialPageRoute(
-            builder: (_) => PdfGeneratotGallery(launchWrapper, labelsConfig)));
+    return showModalBottomSheet<File>(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: new Wrap(
+              children: <Widget>[
+                new ListTile(
+                    leading: new Icon(Icons.camera_alt),
+                    title: new Text(
+                        labelsConfig[ScannerLabelsConfig.PICKER_CAMERA_LABEL] ??
+                            'Camera'),
+                    onTap: () async {
+                      Navigator.pop(
+                          context,
+                          await _scanDocument(
+                              ScannerFileSource.CAMERA, labelsConfig));
+                    }),
+                new ListTile(
+                  leading: new Icon(Icons.image_search),
+                  title: new Text(
+                      labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
+                          'Galerie photo'),
+                  onTap: () async {
+                    Navigator.pop(
+                        context,
+                        await _scanDocument(
+                            ScannerFileSource.GALLERY, labelsConfig));
+                  },
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   /// Scanner to get single scanned image
@@ -62,7 +90,6 @@ class DocumentScannerFlutter {
     }
     return showModalBottomSheet<File>(
         context: context,
-        isDismissible: false,
         builder: (BuildContext bc) {
           return Container(
             child: new Wrap(
