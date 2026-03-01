@@ -1,14 +1,21 @@
 package com.document.scanner.flutter.document_scanner_flutter
 
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.NonNull
+import androidx.exifinterface.media.ExifInterface
+import com.scanlibrary.ScanActivity
+import com.scanlibrary.ScanConstants
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -17,30 +24,29 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
 import java.io.File
-import java.util.*
-import com.scanlibrary.ScanActivity
-import com.scanlibrary.ScanConstants
-
+import java.io.FileOutputStream
 
 /** DocumentScannerFlutterPlugin */
-class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
+class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
+    PluginRegistry.ActivityResultListener {
+
     private lateinit var channel: MethodChannel
     private lateinit var call: MethodCall
 
-    /// For activity binding
     private var activityPluginBinding: ActivityPluginBinding? = null
     private var result: Result? = null
 
-    /// For scanner library
     companion object {
-        val SCAN_REQUEST_CODE: Int = 101
+        const val SCAN_REQUEST_CODE: Int = 101
+        private const val PREFS_NAME = "AppData"
+        private const val PREFS_KEY_IMAGE_PATH = "imagePathDocumentScanner"
     }
-
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "document_scanner_flutter")
@@ -56,15 +62,10 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         this.result = result
 
         when (call.method) {
-            "camera" -> {
-                camera()
-            }
-            "gallery" -> {
-                gallery()
-            }
-            else -> {
-                result.notImplemented()
-            }
+            "camera" -> camera()
+            "gallery" -> gallery()
+            "retrieveLostData" -> retrieveLostData(result)
+            else -> result.notImplemented()
         }
     }
 
@@ -78,7 +79,120 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         activityPluginBinding = null
     }
 
-    private fun composeIntentArguments(intent:Intent) = mapOf(
+    override fun onDetachedFromActivityForConfigChanges() {
+        onDetachedFromActivity()
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        onAttachedToActivity(binding)
+    }
+
+    // ─── Method Handlers ──────────────────────────────────────────────────────
+
+    private fun camera() {
+        val activity = activityPluginBinding?.activity ?: return
+        val intent = Intent(activity, ScanActivity::class.java)
+        intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_CAMERA)
+
+        val initialImageBytes = call.argument<ByteArray>("INITIAL_IMAGE")
+        if (initialImageBytes != null) {
+            val loadingMessage = call.argument<String>("ANDROID_INITIAL_IMAGE_LOADING_MESSAGE") ?: "Loading..."
+            val canBackToInitial = call.argument<Boolean>("CAN_BACK_TO_INITIAL") ?: true
+
+            @Suppress("DEPRECATION")
+            val progressDialog = ProgressDialog(activity).apply {
+                setMessage(loadingMessage)
+                setCancelable(false)
+                show()
+            }
+
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val rotationDegrees = withContext(Dispatchers.IO) {
+                        getRotationDegreesFromByteArray(initialImageBytes)
+                    }
+                    val uri = withContext(Dispatchers.IO) {
+                        saveImageToTempFile(activity, initialImageBytes, rotationDegrees)
+                    }
+                    progressDialog.dismiss()
+
+                    if (uri != null) {
+                        intent.putExtra(ScanConstants.INITIAL_IMAGE, uri.toString())
+                        intent.putExtra(ScanConstants.CAN_BACK_TO_INITIAL, canBackToInitial)
+                    }
+                    composeIntentArguments(intent)
+                    activity.startActivityForResult(intent, SCAN_REQUEST_CODE)
+                } catch (e: Exception) {
+                    progressDialog.dismiss()
+                    Log.e("DocumentScanner", "Error processing initial image: ${e.message}")
+                    composeIntentArguments(intent)
+                    activity.startActivityForResult(intent, SCAN_REQUEST_CODE)
+                }
+            }
+            return
+        }
+
+        composeIntentArguments(intent)
+        activity.startActivityForResult(intent, SCAN_REQUEST_CODE)
+    }
+
+    private fun gallery() {
+        val activity = activityPluginBinding?.activity ?: return
+        val intent = Intent(activity, ScanActivity::class.java)
+        intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_MEDIA)
+        composeIntentArguments(intent)
+        activity.startActivityForResult(intent, SCAN_REQUEST_CODE)
+    }
+
+    private fun retrieveLostData(result: Result) {
+        val activity = activityPluginBinding?.activity
+        if (activity == null) {
+            result.success(null)
+            return
+        }
+        val prefs = activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val savedPath = prefs.getString(PREFS_KEY_IMAGE_PATH, null)
+        prefs.edit().remove(PREFS_KEY_IMAGE_PATH).apply()
+        result.success(savedPath)
+    }
+
+    // ─── Activity Result ──────────────────────────────────────────────────────
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if (requestCode != SCAN_REQUEST_CODE) return false
+
+        return when (resultCode) {
+            Activity.RESULT_OK -> {
+                val activity = activityPluginBinding?.activity ?: return true
+                val uri = data?.extras?.getParcelable<Uri>(ScanConstants.SCANNED_RESULT)
+                val realPath = if (uri != null) getRealPathFromUri(activity, uri) else null
+
+                // Save for lost data recovery
+                if (realPath != null) {
+                    activity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        .edit().putString(PREFS_KEY_IMAGE_PATH, realPath).apply()
+                }
+
+                result?.success(realPath)
+                result = null
+                true
+            }
+            Activity.RESULT_CANCELED -> {
+                result?.success(null)
+                result = null
+                false
+            }
+            else -> {
+                result?.success(null)
+                result = null
+                false
+            }
+        }
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    private fun composeIntentArguments(intent: Intent) = mapOf(
         ScanConstants.SCAN_NEXT_TEXT to "ANDROID_NEXT_BUTTON_LABEL",
         ScanConstants.SCAN_SAVE_TEXT to "ANDROID_SAVE_BUTTON_LABEL",
         ScanConstants.SCAN_ROTATE_LEFT_TEXT to "ANDROID_ROTATE_LEFT_LABEL",
@@ -91,39 +205,19 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         ScanConstants.SCAN_CANT_CROP_ERROR_TITLE to "ANDROID_CANT_CROP_ERROR_TITLE",
         ScanConstants.SCAN_CANT_CROP_ERROR_MESSAGE to "ANDROID_CANT_CROP_ERROR_MESSAGE",
         ScanConstants.SCAN_OK_LABEL to "ANDROID_OK_LABEL"
-    ).entries.filter { call.hasArgument(it.value) && call.argument<String>(it.value) != null }.forEach {
-        intent.putExtra(it.key,  call.argument<String>(it.value))
-    }
-
-    private fun camera() {
-        activityPluginBinding?.activity?.apply {
-            val intent = Intent(this, ScanActivity::class.java)
-            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE,  ScanConstants.OPEN_CAMERA)
-            composeIntentArguments(intent)
-            startActivityForResult(intent, SCAN_REQUEST_CODE)
-        }
-    }
-
-    private fun gallery() {
-        activityPluginBinding?.activity?.apply {
-            val intent = Intent(this, ScanActivity::class.java)
-            intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, ScanConstants.OPEN_MEDIA)
-            composeIntentArguments(intent)
-            startActivityForResult(intent, SCAN_REQUEST_CODE)
-        }
-    }
+    ).entries
+        .filter { call.hasArgument(it.value) && call.argument<String>(it.value) != null }
+        .forEach { intent.putExtra(it.key, call.argument<String>(it.value)) }
 
     fun getRealPathFromUri(context: Context, contentUri: Uri?): String? {
         if (contentUri == null) return null
 
-        // Android 10+ (API 29+): use ContentResolver stream to copy to temp file
+        // Android 10+ (API 29+): stream copy to avoid deprecated DATA column
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return try {
                 val inputStream = context.contentResolver.openInputStream(contentUri) ?: return null
                 val tempFile = File.createTempFile("scan_", ".jpg", context.cacheDir)
-                tempFile.outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
-                }
+                tempFile.outputStream().use { inputStream.copyTo(it) }
                 inputStream.close()
                 tempFile.absolutePath
             } catch (e: Exception) {
@@ -148,29 +242,46 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        // React to activity result and if request code == ResultActivity.REQUEST_CODE
-        return when (resultCode) {
-            Activity.RESULT_OK -> {
-                if (requestCode == SCAN_REQUEST_CODE) {
-                    activityPluginBinding?.activity?.apply {
-                        val uri = data?.extras?.getParcelable<Uri>(ScanConstants.SCANNED_RESULT)
-                        if (uri != null) {
-                            result?.success(getRealPathFromUri(activityPluginBinding!!.activity, uri))
-                        } else {
-                            result?.success(null)
-                        }
-                    }
+    private fun getRotationDegreesFromByteArray(byteArray: ByteArray): Float {
+        return try {
+            ByteArrayInputStream(byteArray).use { inputStream ->
+                val exif = ExifInterface(inputStream)
+                val orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+                )
+                when (orientation) {
+                    ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                    ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                    ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                    else -> 0f
                 }
-                true
             }
-            else -> false
+        } catch (e: Exception) {
+            Log.e("DocumentScanner", "EXIF read error: ${e.message}")
+            0f
         }
     }
 
-    override fun onDetachedFromActivityForConfigChanges() {}
+    private fun saveImageToTempFile(context: Context, byteArray: ByteArray, rotationDegrees: Float): Uri? {
+        return try {
+            var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size) ?: return null
+            if (rotationDegrees != 0f) {
+                val rotated = rotateBitmap(bitmap, rotationDegrees)
+                bitmap.recycle()
+                bitmap = rotated
+            }
+            val file = File(context.cacheDir, "scan_initial_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+            bitmap.recycle()
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            Log.e("DocumentScanner", "Error saving temp image: ${e.message}")
+            null
+        }
+    }
 
-    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {}
-
-
+    private fun rotateBitmap(source: Bitmap, angle: Float): Bitmap {
+        val matrix = Matrix().apply { postRotate(angle) }
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+    }
 }

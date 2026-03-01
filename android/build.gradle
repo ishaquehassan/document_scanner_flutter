@@ -64,5 +64,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.github.ishaquehassan:AndroidDocumentScanLibrary:1.8.2'
+    implementation 'androidx.exifinterface:exifinterface:1.3.6'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'com.github.criistian14:AndroidDocumentScanLibrary:2.0.3'
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:document_scanner_flutter/screens/pdf_generator_gallery.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,18 @@ class DocumentScannerFlutter {
       const MethodChannel('document_scanner_flutter');
 
   static Future<File?> _scanDocument(
-      ScannerFileSource source, Map<dynamic, String> androidConfigs) async {
-    Map<String, String?> finalAndroidArgs = {};
+    ScannerFileSource source,
+    Map<dynamic, String> androidConfigs, {
+    Uint8List? initialImage,
+    bool canBackToInitial = true,
+  }) async {
+    Map<String, dynamic> finalAndroidArgs = {};
     for (var entry in androidConfigs.entries) {
       finalAndroidArgs[entry.key.name] = entry.value;
+    }
+    if (initialImage != null) {
+      finalAndroidArgs['INITIAL_IMAGE'] = initialImage;
+      finalAndroidArgs['CAN_BACK_TO_INITIAL'] = canBackToInitial;
     }
 
     String? path = await _channel.invokeMethod(
@@ -53,11 +62,16 @@ class DocumentScannerFlutter {
   /// `context` : BuildContext to attach source selection
   /// `source` : Either ScannerFileSource.CAMERA or ScannerFileSource.GALLERY
   /// `androidConfigs` : Android scanner labels configuration
-  static Future<File?>? launch(BuildContext context,
-      {ScannerFileSource? source,
-      Map<dynamic, String> labelsConfig = const {}}) {
+  static Future<File?>? launch(
+    BuildContext context, {
+    ScannerFileSource? source,
+    Map<dynamic, String> labelsConfig = const {},
+    Uint8List? initialImage,
+    bool canBackToInitial = true,
+  }) {
     if (source != null) {
-      return _scanDocument(source, labelsConfig);
+      return _scanDocument(source, labelsConfig,
+          initialImage: initialImage, canBackToInitial: canBackToInitial);
     }
     return showModalBottomSheet<File>(
         context: context,
@@ -98,5 +112,15 @@ class DocumentScannerFlutter {
             ],
           );
         });
+  }
+
+  /// Retrieves lost scan data after an app crash or process death (Android only).
+  ///
+  /// Returns the last scanned image [File] if available, or `null`.
+  static Future<File?> retrieveLostData() async {
+    if (!Platform.isAndroid) return null;
+    final String? path = await _channel.invokeMethod('retrieveLostData');
+    if (path == null) return null;
+    return File(path);
   }
 }

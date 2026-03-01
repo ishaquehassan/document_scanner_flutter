@@ -1,3 +1,14 @@
+## 0.4.0
+
+* Added `initialImage` parameter to `launch()` — pass a pre-captured `Uint8List` image directly into the scanner for re-editing
+* Added `canBackToInitial` parameter — controls whether user can go back to the original image
+* Added `retrieveLostData()` static method — recovers last scanned image path after app crash/process death (Android only)
+* Added EXIF rotation auto-correction when loading initial images
+* Added `ANDROID_INITIAL_IMAGE_LOADING_MESSAGE` to `ScannerLabelsConfig` for customizing the loading dialog text
+* Upgraded underlying Android scan library to `criistian14:AndroidDocumentScanLibrary:2.0.3`
+* Added `androidx.exifinterface` and `kotlinx-coroutines-android` dependencies
+* Improved `RESULT_CANCELED` handling — properly returns `null` to Flutter instead of hanging
+
 ## 0.3.0
 
 * **Breaking**: Minimum iOS deployment target bumped to 12.0
