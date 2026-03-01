@@ -10,8 +10,14 @@ public class SwiftDocumentScannerFlutterPlugin: NSObject, FlutterPlugin {
     
     public override init() {
         super.init()
-        rootViewController =
-            (UIApplication.shared.delegate?.window??.rootViewController)!;
+        if #available(iOS 13.0, *) {
+            rootViewController = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }?.rootViewController
+        } else {
+            rootViewController = UIApplication.shared.delegate?.window??.rootViewController
+        }
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -66,16 +72,19 @@ extension SwiftDocumentScannerFlutterPlugin : ImageScannerControllerDelegate{
     
     public func imageScannerControllerDidCancel(_ scanner: ImageScannerController) {
         scanner.dismiss(animated: true)
+        result?(nil)
     }
-    
+
     public func imageScannerController(_ scanner: ImageScannerController, didFailWithError error: Error) {
         scanner.dismiss(animated: true)
+        result?(FlutterError(code: "SCAN_ERROR", message: error.localizedDescription, details: nil))
     }
 }
 
 extension SwiftDocumentScannerFlutterPlugin: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
+        result?(nil)
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {

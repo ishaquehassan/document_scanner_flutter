@@ -28,11 +28,11 @@ class Utils {
         
         let fileName = uniqueFileNameWithExtention(fileExtension: "jpg")
         let fileURL = documentsDirectory.appendingPathComponent(fileName)
-        guard let data = image.jpegData(compressionQuality: 1) else { return nil }
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
 
         do {
             try data.write(to: fileURL)
-            return fileURL.absoluteString
+            return fileURL.path
         } catch let error {
             print("error saving file with error", error)
             return nil

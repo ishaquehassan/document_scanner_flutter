@@ -27,4 +27,5 @@ enum ScannerLabelsConfig {
 
   PICKER_CAMERA_LABEL,
   PICKER_GALLERY_LABEL,
+  PICKER_CANCEL_LABEL,
 }

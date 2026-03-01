@@ -1,17 +1,14 @@
 package com.document.scanner.flutter.document_scanner_flutter
 
 import android.app.Activity
-import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
-import android.os.Environment
-import android.os.StrictMode
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
 import androidx.annotation.NonNull
-import androidx.core.app.ActivityCompat
-//import com.scanlibrary.ScanActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -21,17 +18,9 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import android.R.attr.data
-import android.content.Context
-import android.database.Cursor
-import androidx.core.net.toFile
 import com.scanlibrary.ScanActivity
 import com.scanlibrary.ScanConstants
-import kotlin.collections.HashMap
 
 
 /** DocumentScannerFlutterPlugin */
@@ -52,8 +41,6 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
         val SCAN_REQUEST_CODE: Int = 101
     }
 
-    lateinit var mCurrentPhotoPath: String
-    private val scannedBitmaps: ArrayList<Uri> = ArrayList()
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "document_scanner_flutter")
@@ -127,17 +114,37 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
     }
 
     fun getRealPathFromUri(context: Context, contentUri: Uri?): String? {
+        if (contentUri == null) return null
+
+        // Android 10+ (API 29+): use ContentResolver stream to copy to temp file
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return try {
+                val inputStream = context.contentResolver.openInputStream(contentUri) ?: return null
+                val tempFile = File.createTempFile("scan_", ".jpg", context.cacheDir)
+                tempFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+                inputStream.close()
+                tempFile.absolutePath
+            } catch (e: Exception) {
+                Log.e("DocumentScanner", "Error copying file: ${e.message}")
+                null
+            }
+        }
+
+        // Android 9 and below: legacy DATA column
         var cursor: Cursor? = null
         return try {
             val proj = arrayOf(MediaStore.Images.Media.DATA)
-            cursor = context.getContentResolver().query(contentUri!!, proj, null, null, null)
-            val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            cursor = context.contentResolver.query(contentUri, proj, null, null, null)
+            val columnIndex = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA) ?: return null
             cursor.moveToFirst()
-            cursor.getString(column_index)
+            cursor.getString(columnIndex)
+        } catch (e: Exception) {
+            Log.e("DocumentScanner", "Error getting real path: ${e.message}")
+            null
         } finally {
-            if (cursor != null) {
-                cursor.close()
-            }
+            cursor?.close()
         }
     }
 
@@ -147,9 +154,12 @@ class DocumentScannerFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             Activity.RESULT_OK -> {
                 if (requestCode == SCAN_REQUEST_CODE) {
                     activityPluginBinding?.activity?.apply {
-                        val uri = data!!.extras!!.getParcelable<Uri>(ScanConstants.SCANNED_RESULT)
-                        println(uri)
-                        result?.success(getRealPathFromUri(activityPluginBinding!!.activity,uri))
+                        val uri = data?.extras?.getParcelable<Uri>(ScanConstants.SCANNED_RESULT)
+                        if (uri != null) {
+                            result?.success(getRealPathFromUri(activityPluginBinding!!.activity, uri))
+                        } else {
+                            result?.success(null)
+                        }
                     }
                 }
                 true

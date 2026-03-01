@@ -34,12 +34,11 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
   onDone() async {
     final pdf = pw.Document();
     for (var file in files) {
+      final bytes = await file.readAsBytes();
       pdf.addPage(pw.Page(build: (pw.Context context) {
         return pw.Center(
           child: pw.Image(
-            pw.MemoryImage(
-              file.readAsBytesSync(),
-            ),
+            pw.MemoryImage(bytes),
           ),
         ); // Center
       }));
@@ -61,8 +60,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
     }
   }
 
-  openViewer(File currentItem) {
-    int index = files.map((e) => e.path).toList().indexOf(currentItem.path);
+  openViewer(File currentItem, int index) {
 
     Navigator.push(
         context,
@@ -101,7 +99,10 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
   @override
   Widget build(BuildContext context) {
     var appBar = AppBar(
-      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).pop(null),
+      ),
       title: Row(
         children: [
           if (files.isNotEmpty) Text(itemsTitle),
@@ -137,12 +138,17 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                             crossAxisSpacing: 1, //vertical space
                             crossAxisCount: 3, //number of images for a row
                             children: files
-                                .map((image) => Hero(
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                                  final index = entry.key;
+                                  final image = entry.value;
+                                  return Hero(
                                       tag: image.path,
                                       child: Stack(
                                         children: [
                                           GestureDetector(
-                                            onTap: () => openViewer(image),
+                                            onTap: () => openViewer(image, index),
                                             child: Image.file(
                                               image,
                                               height: 150,
@@ -157,10 +163,7 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                                               right: 5,
                                               top: 5,
                                               child: GestureDetector(
-                                                onTap: () => _removeFile(files
-                                                    .map((e) => e.path)
-                                                    .toList()
-                                                    .indexOf(image.path)),
+                                                onTap: () => _removeFile(index),
                                                 child: Container(
                                                   padding: EdgeInsets.all(3),
                                                   decoration: BoxDecoration(
@@ -178,7 +181,8 @@ class _PdfGeneratotGalleryState extends State<PdfGeneratotGallery> {
                                               ))
                                         ],
                                       ),
-                                    ))
+                                  );
+                                })
                                 .toList()),
                       ),
                     ],

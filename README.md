@@ -9,7 +9,7 @@ A document scanner + PDF generator plugin for flutter
 #### Installing
 
 ```yaml
-document_scanner_flutter: ^0.2.3
+document_scanner_flutter: ^0.3.0
 ```
 
 #### Basic Usage
@@ -35,7 +35,16 @@ try {
 ```
 
 
-## New Features! 🎊🥳😎
+## Requirements
+
+| Platform | Minimum Version |
+|----------|----------------|
+| Android  | API 21 (Android 5.0) |
+| iOS      | iOS 12.0 |
+| Flutter  | 3.0.0 |
+| Dart     | 2.17.0 |
+
+## Features
 #### PDF generation of scanned images
 ``` dart
 try {

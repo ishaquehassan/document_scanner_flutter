@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:document_scanner_flutter/screens/pdf_generator_gallery.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -17,16 +16,16 @@ class DocumentScannerFlutter {
       ScannerFileSource source, Map<dynamic, String> androidConfigs) async {
     Map<String, String?> finalAndroidArgs = {};
     for (var entry in androidConfigs.entries) {
-      finalAndroidArgs[describeEnum(entry.key)] = entry.value;
+      finalAndroidArgs[entry.key.name] = entry.value;
     }
 
     String? path = await _channel.invokeMethod(
-        describeEnum(source).toLowerCase(), finalAndroidArgs);
+        source.name.toLowerCase(), finalAndroidArgs);
     if (path == null) {
       return null;
     } else {
       if (Platform.isIOS) {
-        path = path.split('file://')[1];
+        path = Uri.parse(path).toFilePath();
       }
       return File(path);
     }
@@ -62,36 +61,41 @@ class DocumentScannerFlutter {
     }
     return showModalBottomSheet<File>(
         context: context,
-        isDismissible: false,
+        isDismissible: true,
         builder: (BuildContext bc) {
-          return Container(
-            child: new Wrap(
-              children: <Widget>[
-                new ListTile(
-                    leading: new Icon(Icons.camera_alt),
-                    title: new Text(
-                        labelsConfig[ScannerLabelsConfig.PICKER_CAMERA_LABEL] ??
-                            'Camera'),
-                    onTap: () async {
-                      Navigator.pop(
-                          context,
-                          await _scanDocument(
-                              ScannerFileSource.CAMERA, labelsConfig));
-                    }),
-                new ListTile(
-                  leading: new Icon(Icons.image_search),
-                  title: new Text(
-                      labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
-                          'Photo Library'),
+          return Wrap(
+            children: <Widget>[
+              ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text(
+                      labelsConfig[ScannerLabelsConfig.PICKER_CAMERA_LABEL] ??
+                          'Camera'),
                   onTap: () async {
                     Navigator.pop(
                         context,
                         await _scanDocument(
-                            ScannerFileSource.GALLERY, labelsConfig));
-                  },
-                ),
-              ],
-            ),
+                            ScannerFileSource.CAMERA, labelsConfig));
+                  }),
+              ListTile(
+                leading: Icon(Icons.image_search),
+                title: Text(
+                    labelsConfig[ScannerLabelsConfig.PICKER_GALLERY_LABEL] ??
+                        'Photo Library'),
+                onTap: () async {
+                  Navigator.pop(
+                      context,
+                      await _scanDocument(
+                          ScannerFileSource.GALLERY, labelsConfig));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.close),
+                title: Text(
+                    labelsConfig[ScannerLabelsConfig.PICKER_CANCEL_LABEL] ??
+                        'Cancel'),
+                onTap: () => Navigator.pop(context, null),
+              ),
+            ],
           );
         });
   }
